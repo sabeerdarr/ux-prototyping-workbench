@@ -1,0 +1,40 @@
+{
+  "name": "ux-prototyping-workbench",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build:runtime": "node scripts/build-runtime.mjs",
+    "predev": "npm run build:runtime",
+    "dev": "next dev",
+    "prebuild": "npm run build:runtime",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx scripts/test-core.ts",
+    "test:adapter": "tsx --conditions=react-server scripts/test-adapter.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.137.0",
+    "clsx": "^2.1.1",
+    "fflate": "^0.8.3",
+    "lucide-react": "^1.61.0",
+    "next": "16.4.2",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "server-only": "^0.0.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/turbopack": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "esbuild": "^0.28.2",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.2",
+    "tailwindcss": "^4",
+    "tsx": "^4.23.15",
+    "typescript": "^5"
+  }
+}
