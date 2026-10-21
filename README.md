@@ -33,6 +33,24 @@ cp .env.example .env.local
 
 Then set `ANTHROPIC_API_KEY` and restart the dev server.
 
+## Hosted demo (GitHub Pages)
+
+Live demo: **https://sabeerdarr.github.io/ux-prototyping-workbench/**
+
+The hosted demo is a static build of the app in demo mode. It has no server and no API key, so:
+
+- Generate loads the prebuilt example, and only the scripted demo refinements work (the banner at the top says so).
+- The API routes are answered in the browser (`src/lib/client/local-backend.ts`), and projects are saved in that visitor's browser storage, not shared.
+- All exports still work, built client-side.
+
+It deploys automatically on every push to `main` (`.github/workflows/pages.yml`). To build it locally:
+
+```bash
+npm run build:pages
+```
+
+The output goes to `out/` and is served under the `/ux-prototyping-workbench` path. Pass a different base path as an argument if the repo is renamed: `node scripts/build-pages.mjs /my-repo`.
+
 ## Environment variables
 
 All variables are read **on the server only**. The key never reaches the browser.
@@ -106,6 +124,7 @@ Versions are never deleted. Undo/redo move a pointer between versions. Restoring
 | `npm test` | Core logic tests: validation, selective patching, diffing, demo provider |
 | `npm run test:adapter` | Runs the real Anthropic adapter and service against a local mock of the Messages API (no key needed) |
 | `npm run typecheck` / `npm run lint` | TypeScript and ESLint |
+| `npm run build:pages` | Static hosted-demo build for GitHub Pages (into `out/`) |
 | `npm run build:runtime` | Rebuilds `public/runtime/prototype-runtime.js` for HTML export (export also rebuilds it automatically if stale) |
 
 ## Exports

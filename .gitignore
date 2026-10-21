@@ -44,3 +44,4 @@ next-env.d.ts
 # local project data and generated runtime
 /data
 /public/runtime
+/out

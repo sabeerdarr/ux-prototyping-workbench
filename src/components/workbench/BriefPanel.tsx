@@ -3,7 +3,6 @@ import { useId, useState } from "react";
 import { ChevronRight, Sparkles, RotateCcw } from "lucide-react";
 import { clsx } from "clsx";
 import type { BriefInput, Platform } from "@/lib/schema";
-import { DEMO_BRIEF } from "@/lib/demo/demo-spec";
 import { Button, Input, Label, Select, Spinner, Textarea } from "../ui";
 import type { Workbench } from "./use-workbench";
 
@@ -14,9 +13,9 @@ const TONE_PLACEHOLDER =
 
 const EMPTY: BriefInput = { description: "", tone: "" };
 
-export function BriefPanel({ wb }: { wb: Workbench }) {
+export function BriefPanel({ wb, initialBrief }: { wb: Workbench; initialBrief?: BriefInput }) {
   const ids = { d: useId(), t: useId(), st: useId(), tu: useId(), g: useId(), p: useId(), v: useId() };
-  const [brief, setBrief] = useState<BriefInput>(wb.project?.brief ?? EMPTY);
+  const [brief, setBrief] = useState<BriefInput>(initialBrief ?? wb.project?.brief ?? EMPTY);
   const [advanced, setAdvanced] = useState(false);
   const [touched, setTouched] = useState(false);
 
@@ -25,7 +24,6 @@ export function BriefPanel({ wb }: { wb: Workbench }) {
   const toneErr = brief.tone.trim().length < 3;
   const busy = wb.job?.kind === "generate";
   const hasVersions = Boolean(wb.project?.versions.length);
-  const isDemo = wb.provider?.active.id === "demo";
   const advancedCount = (["screenType", "targetUsers", "primaryGoal", "platform", "visualStyle"] as const).filter((k) => brief[k]).length;
 
   const submit = () => {
@@ -136,14 +134,6 @@ export function BriefPanel({ wb }: { wb: Workbench }) {
         </Button>
         {hasVersions && !busy && (
           <p className="text-[11.5px] leading-snug text-wb-ink-3">Regenerating builds a new screen from the brief and adds it as a new version. Earlier versions stay in History.</p>
-        )}
-        {isDemo && (
-          <div className="rounded-md border border-amber-200 bg-amber-50 px-2.5 py-2 text-[11.5px] leading-snug text-amber-900">
-            <strong className="font-semibold">Demo mode.</strong> No API key is configured, so Generate loads a prebuilt example (not AI-generated) whatever you enter.{" "}
-            <button type="button" className="font-semibold underline" onClick={() => setBrief(DEMO_BRIEF)}>
-              Fill in the matching brief
-            </button>
-          </div>
         )}
         {wb.project && JSON.stringify(brief) !== JSON.stringify(wb.project.brief) && !busy && (
           <Button variant="ghost" size="xs" icon={<RotateCcw size={12} />} onClick={() => setBrief(wb.project!.brief)} className="self-start">

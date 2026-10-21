@@ -12,7 +12,8 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "tsx scripts/test-core.ts",
-    "test:adapter": "tsx --conditions=react-server scripts/test-adapter.ts"
+    "test:adapter": "tsx --conditions=react-server scripts/test-adapter.ts",
+    "build:pages": "node scripts/build-pages.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.137.0",

@@ -2,6 +2,18 @@
 import type { Progress } from "../ai/types";
 import type { Project, ProjectSummary, ProviderInfo } from "../schema";
 
+/**
+ * The static hosted demo has no server, so API calls are answered in the
+ * browser by local-backend (loaded only in that build).
+ */
+const STATIC_DEMO = process.env.NEXT_PUBLIC_STATIC_DEMO === "1";
+
+async function appFetch(url: string, init?: RequestInit): Promise<Response> {
+  if (!STATIC_DEMO) return fetch(url, init);
+  const { localFetch } = await import("./local-backend");
+  return localFetch(url, init);
+}
+
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -26,7 +38,7 @@ export interface ProviderStatus {
 export async function streamRequest<T>(url: string, body: unknown, onProgress: (p: Progress) => void, signal?: AbortSignal): Promise<T> {
   let res: Response;
   try {
-    res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), signal });
+    res = await appFetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), signal });
   } catch (err) {
     if ((err as Error).name === "AbortError") throw new ApiError("Cancelled.", "cancelled", true);
     throw new ApiError("Couldn't reach the workbench server. Is `npm run dev` still running?", "network", true);
@@ -66,25 +78,25 @@ export async function streamRequest<T>(url: string, body: unknown, onProgress: (
 }
 
 export async function fetchProviderStatus(): Promise<ProviderStatus> {
-  const res = await fetch("/api/provider", { cache: "no-store" });
+  const res = await appFetch("/api/provider", { cache: "no-store" });
   return res.json();
 }
 
 export async function listProjects(): Promise<ProjectSummary[]> {
-  const res = await fetch("/api/projects", { cache: "no-store" });
+  const res = await appFetch("/api/projects", { cache: "no-store" });
   if (!res.ok) throw new ApiError("Couldn't load projects.", "http", true);
   return (await res.json()).projects;
 }
 
 export async function loadProject(id: string): Promise<Project | null> {
-  const res = await fetch(`/api/projects/${encodeURIComponent(id)}`, { cache: "no-store" });
+  const res = await appFetch(`/api/projects/${encodeURIComponent(id)}`, { cache: "no-store" });
   if (res.status === 404) return null;
   if (!res.ok) throw new ApiError("Couldn't load the project.", "http", true);
   return (await res.json()).project;
 }
 
 export async function saveProject(project: Project): Promise<void> {
-  const res = await fetch(`/api/projects/${encodeURIComponent(project.id)}`, {
+  const res = await appFetch(`/api/projects/${encodeURIComponent(project.id)}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ project }),
@@ -93,12 +105,12 @@ export async function saveProject(project: Project): Promise<void> {
 }
 
 export async function deleteProject(id: string): Promise<void> {
-  const res = await fetch(`/api/projects/${encodeURIComponent(id)}`, { method: "DELETE" });
+  const res = await appFetch(`/api/projects/${encodeURIComponent(id)}`, { method: "DELETE" });
   if (!res.ok && res.status !== 404) throw new ApiError("Couldn't delete the project.", "http", true);
 }
 
 export async function downloadExport(kind: "html" | "react", body: unknown, filename: string) {
-  const res = await fetch(`/api/export/${kind}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  const res = await appFetch(`/api/export/${kind}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
   if (!res.ok) {
     const data = (await res.json().catch(() => null)) as { message?: string } | null;
     throw new ApiError(data?.message ?? "Export failed.", "http", true);
